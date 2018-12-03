@@ -18,6 +18,7 @@ Kubernetes cluster. If you fetched the Portworx specs from [https://install.port
 **PX Version**
 
 Cloud snapshots using below method is supported in Portworx version 1.4 and above.
+Cloud snapshots (for aggregated volumes) using below method is supported in Portworx version 2.0 and above.
 
 **Configuring cloud secrets**
 
