@@ -2,7 +2,7 @@
 title: Class of Service
 description: Explanation on class of service for Portworx volumes
 keywords: portworx, cos, class of service, production
-weight: 1
+weight: 2
 series: concepts
 ---
 

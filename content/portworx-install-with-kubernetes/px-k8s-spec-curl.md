@@ -13,17 +13,20 @@ Below is an example of using curl to generate the Portworx spec file. Review the
 **Openshift Users:**<br/> Make sure you use `osft=true` when generating the spec.
 {{</info>}}
 
-```bash
-$ VER=$(kubectl version --short | awk -Fv '/Server Version: /{print $3}')
-# For the 1.4 tech preview release
-$ curl -L -o px-spec.yaml "https://install.portworx.com/1.4/?c=mycluster&k=etcd://<ETCD_ADDRESS>:<ETCD_PORT>&kbver=$VER"
+First, let's pick the Portworx release you want.
 
-# For the 1.3 stable release
-$ curl -L -o px-spec.yaml "https://install.portworx.com/1.3/?c=mycluster&k=etcd://<ETCD_ADDRESS>:<ETCD_PORT>&kbver=$VER"
+```text
+REL=""          # DEFAULT portworx release
+#REL="/2.0"     # 2.0 portworx release
+#REL="/1.7"     # 1.7 portworx release
+#REL="/1.6"     # 1.6 portworx release
+#REL="/1.5"     # 1.5 portworx release
+```
 
-# For the 1.2 stable release
-$ curl -L -o px-spec.yaml "https://install.portworx.com/1.2/?c=mycluster&k=etcd://<ETCD_ADDRESS>:<ETCD_PORT>&kbver=$VER"
+Now generate the spec:
 
+```text
+curl -fsL  "https://install.portworx.com/$REL/?c=mycluster&k=etcd://<ETCD_ADDRESS>:<ETCD_PORT>&kbver=$(kubectl version --short | awk -Fv '/Server Version: /{print $3}')"
 ```
 
 Below are all parameters that can be given in the query string.
