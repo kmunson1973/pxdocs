@@ -26,7 +26,7 @@ You have 2 options for migrating applications.
 ### Step 2. Enter Portworx maintenance mode {#2-enter-portworx-maintenance-mode}
 
 ```text
-pxctl service maintenance –enter
+pxctl service maintenance --enter
 ```
 
 This takes Portworx out of an “Operational” state for a given node. Perform whatever maintenance tasks are needed.
@@ -36,7 +36,7 @@ This takes Portworx out of an “Operational” state for a given node. Perform 
 Once you are done with maintenance tasks, run
 
 ```text
-pxctl service maintenance –exit
+pxctl service maintenance --exit
 ```
 
 This puts Portworx back in to “Operational” state for a given node.

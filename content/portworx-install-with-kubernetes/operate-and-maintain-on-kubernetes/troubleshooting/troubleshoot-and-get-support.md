@@ -5,14 +5,80 @@ keywords: portworx, container, Kubernetes, storage, Docker, k8s, flexvol, pv, pe
 description: For troubleshooting PX on Kubernetes, Portworx can help. Read this article for details about how to resolve your issue today.
 ---
 
-#### Etcd {#etcd}
+### Useful commands {#useful-commands}
+
+* List PX pods:
+
+    ```text
+    kubectl get pods -l name=portworx -n kube-system -o wide
+    ```
+* Describe PX pods:
+
+    ```text
+    kubectl describe pods -l name=portworx -n kube-system
+    ```
+* Get PX cluster status:
+
+      ```text
+      PX_POD=$(kubectl get pods -l name=portworx -n kube-system -o jsonpath='{.items[0].metadata.name}')
+      kubectl exec $PX_POD -n kube-system -- /opt/pwx/bin/pxctl status
+      ```
+
+* List PX volumes:
+
+      ```text
+      PX_POD=$(kubectl get pods -l name=portworx -n kube-system -o jsonpath='{.items[0].metadata.name}')
+      kubectl exec $PX_POD -n kube-system -- /opt/pwx/bin/pxctl volume list
+      ```
+
+* Portworx logs:
+  * Recent Portworx logs can be gathered by using this kubectl command:
+        ```text
+        kubectl logs -n kube-system -l name=portworx --tail=99999
+        ```
+
+  * If you have access to a particular node, you can use this journalctl command to get all Portworx logs:
+      ```text
+      journalctl -lu portworx*
+      ```
+* Monitor kubelet logs on a particular Kubernetes node:
+
+    ```text
+    journalctl -lfu kubelet
+    ```
+  * This can be useful to understand why a particular pod is stuck in creating or terminating state on a node.
+
+### Collecting Logs from PX {#collecting-logs-from-px}
+
+Please run the following commands on any one of the nodes running Portworx:
+
+```text
+uname -a
+docker version
+kubectl version
+kubectl logs -n kube-system -l name=portworx --tail=99999
+kubectl get pods -n kube-system -l name=portworx -o wide
+PX_POD=$(kubectl get pods -l name=portworx -n kube-system -o jsonpath='{.items[0].metadata.name}')
+kubectl exec $PX_POD -n kube-system -- /opt/pwx/bin/pxctl status
+kubectl exec $PX_POD -n kube-system -- /opt/pwx/bin/pxctl volume list
+```
+
+Include above logs when contacting us.
+
+### Get support {#get-support}
+
+If you have an enterprise license, please contact us at support@portworx.com with your license key and logs.
+
+We are always available on Slack. Join us! [![Slack](/img/slack.png)](http://slack.portworx.com)
+
+### Etcd {#etcd}
 
 * Px container will fail to come up if it cannot reach etcd. For etcd installation instructions refer this [doc](/portworx-install-with-kubernetes/operate-and-maintain-on-kubernetes/etcd).
   * The etcd location specified when creating the Portworx cluster needs to be reachable from all nodes.
   * Run `curl <etcd_location>/version` from each node to ensure reachability. For e.g `curl http://192.168.33.10:2379/version`
 * If you deployed etcd as a Kubernetes service, use the ClusterIP instead of the kube-dns name. Portworx nodes cannot resolve kube-dns entries since px containers are in the host network.
 
-#### Portworx cluster {#portworx-cluster}
+### Portworx cluster {#portworx-cluster}
 
 * Ports 9001 - 9022 must be open for internal network traffic between nodes running PX. Without this, px cluster nodes will not be able to communicate and cluster will be down.
 * If one of your nodes has a custom taint, the Portworx pod will not get scheduled on that node unless you add a toleration in the Portworx DaemonSet spec. Read [here](https://kubernetes.io/docs/concepts/configuration/assign-pod-node/#taints-and-tolerations-beta-feature) for more information about taints and tolerations.
@@ -28,7 +94,7 @@ description: For troubleshooting PX on Kubernetes, Portworx can help. Read this 
     1. Downgrade the “kubectl” version to match your server’s version, or
     2. Reapply the spec with client-validation turned off, e.g.: `kubectl apply --validate=false ...`
 
-#### PVC creation {#pvc-creation}
+### PVC creation {#pvc-creation}
 
 If the PVC creation is failing, this could be due the following reasons
 
@@ -41,7 +107,7 @@ If the PVC creation is failing, this could be due the following reasons
 * Describe the PVC using `kubectl describe pvc <pvc-name>` and look at errors in the events section which might be causing failure of the PVC creation.
 * Make sure you are running Kubernetes 1.6 and above. Kubernetes 1.5 does not have our native driver which is required for PVC creation.
 
-#### DNS policy updates {#dns-policy-updates}
+### DNS policy updates {#dns-policy-updates}
 
 If you need to change the [dnsPolicy](https://kubernetes.io/docs/concepts/services-networking/dns-pod-service/#pods-dns-policy) parameter for the PX-OCI service, please also restart the PX-OCI service\(s\) after changing/editing the YAML-spec:
 
@@ -56,7 +122,7 @@ If you need to change the [dnsPolicy](https://kubernetes.io/docs/concepts/servic
   sleep 30; kubectl label nodes --all px/service-
 ```
 
-#### Application pods {#application-pods}
+### Application pods {#application-pods}
 
 * Ensure Portworx container is running on the node where the application pod is scheduled. This is required for Portworx to mount the volume into the pod.
 * Ensure the PVC used by the application pod is in “Bound” state.
@@ -69,54 +135,7 @@ If you need to change the [dnsPolicy](https://kubernetes.io/docs/concepts/servic
   * Portworx was down on this node for a period of more than 10 minutes. This caused the volume to go into read-only state. Hence the application pod can no longer write to the volume filesystem. To fix this issue, delete the pod. A new pod will get created and the volume will be setup again. The pod will resume with the same persistent data since that is being backed by a PVC provisioned by Portworx.
   * The application container found existing data in the mounted PVC volume and was expecting an empty volume.
 
-#### Useful commands {#useful-commands}
-
-* List PX pods: `kubectl get pods -l name=portworx -n kube-system -o wide`
-* Describe PX pods: `kubectl describe pods -l name=portworx -n kube-system`
-* Get PX cluster status:
-
-  ```text
-  PX_POD=$(kubectl get pods -l name=portworx -n kube-system -o jsonpath='{.items[0].metadata.name}')
-  kubectl exec $PX_POD -n kube-system -- /opt/pwx/bin/pxctl status
-  ```
-
-* List PX volumes:
-
-  ```text
-  PX_POD=$(kubectl get pods -l name=portworx -n kube-system -o jsonpath='{.items[0].metadata.name}')
-  kubectl exec $PX_POD -n kube-system -- /opt/pwx/bin/pxctl volume list
-  ```
-
-* Portworx logs
-  * If you have deployed PX as OCI, for each node running Portworx: `journalctl -lu portworx`
-  * If you have deployed PX as docker containers: `kubectl logs -n kube-system -l name=portworx --tail=99999`
-* Monitor kubelet logs on a particular Kubernetes node: `journalctl -lfu kubelet`
-  * This can be useful to understand why a particular pod is stuck in creating or terminating state on a node.
-
-#### Collecting Logs from PX {#collecting-logs-from-px}
-
-Please run the following commands on any one of the nodes running Portworx:
-
-```text
-uname -a
-docker version
-kubectl version
-kubectl logs -n kube-system -l name=portworx --tail=1000
-kubectl get pods -n kube-system -l name=portworx -o wide
-PX_POD=$(kubectl get pods -l name=portworx -n kube-system -o jsonpath='{.items[0].metadata.name}')
-kubectl exec $PX_POD -n kube-system -- /opt/pwx/bin/pxctl status
-kubectl exec $PX_POD -n kube-system -- /opt/pwx/bin/pxctl volume list
-```
-
-Include above logs when contacting us.
-
-#### Get support {#get-support}
-
-If you have an enterprise license, please contact us at support@portworx.com with your license key and logs.
-
-We are always available on Slack. Join us! [![Slack](/img/slack.png)](http://slack.portworx.com)
-
-#### Known issues {#known-issues}
+### Known issues {#known-issues}
 
 **Kubernetes on CoreOS deployed through Tectonic**
 

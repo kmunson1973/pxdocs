@@ -89,9 +89,3 @@ drop database TEST_1234;
 show databases;
 exit
 ```
-
-:
-:q!
-d
-d
-ad

@@ -37,6 +37,17 @@ series: reference
   Workaround: This is a variant of the previous errata. 
   For volume with replication factor set to 1, Cloudsnap backup does not resume after the node with replica goes down.
 
+## 1.7.2
+
+### Key Features and Enhancements
+* Default queue depth for all volumes (new, coming from older release) set to 128
+* Advanced runtime options for write amplification reduction
+
+### Key Fixes
+* PWX-6928: Store bucket name in cloudsnap object
+* PWX-6904: Fix bucket name for cloudsnap ID while reporting status
+* PWX-7071: Do not use GFP_ATOMIC allocation
+
 ## 1.7.1.1
 * Fix to add/remove node labels in Kubernetes to indicate where volume replicas are placed
 
