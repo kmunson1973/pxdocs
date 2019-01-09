@@ -78,6 +78,7 @@ grep -q '/opt/pwx/oci /opt/pwx/oci' /proc/self/mountinfo && sudo umount /opt/pwx
 sudo rm -fr /opt/pwx
 
 # 4: [OPTIONAL] Remove configuration files. Doing this means UNRECOVERABLE DATA LOSS.
+sudo chattr -ie /etc/pwx/.private.json
 sudo rm -fr /etc/pwx
 ```
 
